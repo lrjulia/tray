@@ -26,11 +26,9 @@ If it does: System Settings › Privacy & Security › Open Anyway. (Homebrew us
 ## Releasing
 
 Every push to `main` builds the app on GitHub Actions (download it from the run's artifacts).
-To publish a release that the install commands pick up:
-
-```sh
-git tag v0.1.0 && git push origin v0.1.0
-```
+To publish a release that the install commands pick up, bump `MARKETING_VERSION` in `project.yml`
+(e.g. to `"0.2.0"`) and push to `main`. The workflow builds, tags `v0.2.0` and publishes the release.
+Pushing a `v*` tag yourself works too.
 
 To sign and notarize, add these repository secrets and tag again: `MACOS_CERT_P12` (base64 of your
 Developer ID Application .p12), `MACOS_CERT_PASSWORD`, `MACOS_SIGNING_IDENTITY` (e.g.
