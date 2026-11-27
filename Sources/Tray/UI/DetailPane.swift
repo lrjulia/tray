@@ -342,7 +342,7 @@ struct ActionBarView: View {
         .padding(.leading, 20)
         .padding(.trailing, Tokens.S.s4)
         .frame(height: 48)
-        .background(Tokens.C.surfaceSunken)
+        .background(Tokens.C.surfaceSunken.opacity(model.backgroundStyle.sunkenOpacity))
         .overlay(alignment: .top) { Rectangle().fill(Tokens.C.line).frame(height: 1) }
     }
 

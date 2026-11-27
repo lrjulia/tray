@@ -21,7 +21,7 @@ struct MainView: View {
                 content
                 ActionBarView(model: model)
             }
-            .background(Tokens.C.surface)
+            .background(WindowBackground(style: model.backgroundStyle))
 
             if model.showActions { ActionsMenuView(model: model) }
             if model.renamingID != nil { RenameOverlay(model: model) }
@@ -115,6 +115,15 @@ struct HeaderView: View {
             .buttonStyle(.plain)
             .help(model.keepOnTop ? "Stop keeping on top" : "Keep on top")
             .accessibilityLabel("Keep window on top")
+
+            Button {
+                model.onShowSettings?()
+            } label: {
+                Image(systemName: "gearshape").foregroundStyle(Tokens.C.inkMuted)
+            }
+            .buttonStyle(.plain)
+            .help("Settings (⌘,)")
+            .accessibilityLabel("Settings")
         }
         .padding(.leading, 20)
         .padding(.trailing, Tokens.S.s4)

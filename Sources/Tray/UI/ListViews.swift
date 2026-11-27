@@ -182,7 +182,7 @@ struct GridColumn: View {
                 }
                 .padding(Tokens.S.s6)
             }
-            .background(Tokens.C.surfaceSunken)
+            .background(Tokens.C.surfaceSunken.opacity(model.backgroundStyle.sunkenOpacity))
             .onChange(of: model.selection) {
                 if let id = model.selection.last { proxy.scrollTo(id) }
             }

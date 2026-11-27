@@ -23,9 +23,53 @@ struct SettingsView: View {
 private struct GeneralSettings: View {
     @Bindable var model: AppModel
     @State private var trusted = Paster.isTrusted
+    @State private var launchAtLogin = LaunchAtLogin.isEnabled
+    @State private var loginMessage: String?
+
+    /// One choice for every kind; shows "Custom" when kinds differ (set per kind under History).
+    private var allRetention: Binding<Retention?> {
+        Binding(
+            get: {
+                let values = Set(KindGroup.allCases.map { model.settings.retention(for: $0) })
+                return values.count == 1 ? values.first : nil
+            },
+            set: { value in
+                guard let value else { return }
+                var r = model.settings.retention
+                for group in KindGroup.allCases { r[group.rawValue] = value }
+                model.settings.retention = r
+            }
+        )
+    }
 
     var body: some View {
         Form {
+            Section {
+                Toggle("Open Tray at login", isOn: Binding(
+                    get: { launchAtLogin },
+                    set: { on in
+                        loginMessage = LaunchAtLogin.set(on)
+                        launchAtLogin = LaunchAtLogin.isEnabled
+                        if LaunchAtLogin.needsApproval { loginMessage = "Allow Tray in Login Items to finish." }
+                    }
+                ))
+                if let loginMessage {
+                    HStack {
+                        Text(loginMessage).font(.caption).foregroundStyle(.secondary)
+                        Spacer()
+                        Button("Open Login Items") { LaunchAtLogin.openLoginItemsSettings() }
+                    }
+                }
+                LabeledContent("Accent color") { AccentSwatches(model: model) }
+                Picker("Keep history for", selection: allRetention) {
+                    ForEach(Retention.allCases) { Text($0.label).tag(Optional($0)) }
+                    if allRetention.wrappedValue == nil {
+                        Text("Custom (set per type in History)").tag(Retention?.none)
+                    }
+                }
+                Text("Shorter times delete older items right away. Pinned items are always kept.")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
             Section("Shortcuts") {
                 LabeledContent("Open Tray", value: "⌘⇧V")
                 LabeledContent("Paste next without opening", value: "⌃⇧V")
@@ -71,20 +115,11 @@ private struct GeneralSettings: View {
 private struct AppearanceSettings: View {
     @Bindable var model: AppModel
 
-    private var accentSelection: Binding<String> {
-        Binding(
-            get: {
-                if case .option(let o) = model.settings.accent { return o.rawValue }
-                return "system"
-            },
-            set: { value in
-                if let option = AccentOption(rawValue: value) {
-                    model.settings.accent = .option(option)
-                } else {
-                    model.settings.accent = .followSystem
-                }
-            }
-        )
+    private var accentName: String {
+        switch model.settings.accent {
+        case .followSystem: return "Following macOS (\(AccentOption.nearestToSystem().label))"
+        case .option(let o): return o.label
+        }
     }
 
     var body: some View {
@@ -96,18 +131,16 @@ private struct AppearanceSettings: View {
                 .pickerStyle(.segmented)
             }
             Section("Accent color") {
-                Picker("Accent", selection: accentSelection) {
-                    Text("Follow macOS").tag("system")
-                    ForEach(AccentOption.allCases) { option in
-                        HStack {
-                            Circle().fill(option.color).frame(width: 10, height: 10)
-                            Text(option.label)
-                        }
-                        .tag(option.rawValue)
-                    }
+                AccentSwatches(model: model)
+                Text("\(accentName). Every option is tested for readable text in light and dark.")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+            Section("Window background") {
+                Picker("Background", selection: $model.settings.background) {
+                    ForEach(BackgroundStyle.allCases) { Text($0.label).tag($0) }
                 }
-                .pickerStyle(.radioGroup)
-                Text("Every option is tested for readable text in light and dark.")
+                .pickerStyle(.segmented)
+                Text("Transparent and Translucent show the desktop blurred behind the window. With Reduce Transparency on in Accessibility settings, Tray uses Solid.")
                     .font(.caption).foregroundStyle(.secondary)
             }
             Section("Items") {

@@ -18,6 +18,27 @@ enum AccentChoice: Codable, Hashable {
     }
 }
 
+enum BackgroundStyle: String, Codable, CaseIterable, Identifiable {
+    case solid, translucent, transparent
+    var id: String { rawValue }
+    var label: String { rawValue.capitalized }
+    /// How much of the surface color sits over the blur. Keeps text readable on busy desktops.
+    var tint: Double {
+        switch self {
+        case .solid: return 1
+        case .translucent: return 0.7
+        case .transparent: return 0.45
+        }
+    }
+    var sunkenOpacity: Double {
+        switch self {
+        case .solid: return 1
+        case .translucent: return 0.6
+        case .transparent: return 0.35
+        }
+    }
+}
+
 enum ItemColoring: String, Codable, CaseIterable, Identifiable {
     case byKind, bySource, neutral
     var id: String { rawValue }
@@ -161,6 +182,7 @@ struct TraySettings: Codable, Equatable {
     var appearance: Appearance = .system
     var accent: AccentChoice = .followSystem
     var itemColoring: ItemColoring = .byKind
+    var background: BackgroundStyle = .transparent
 
     // Onboarding
     var hasCompletedOnboarding = false
@@ -169,9 +191,17 @@ struct TraySettings: Codable, Equatable {
         retention[group.rawValue] ?? .month
     }
 
+    /// Loads saved settings over the defaults, so settings added in a new version get their default
+    /// instead of resetting everything.
     static func load() -> TraySettings {
         guard let data = UserDefaults.standard.data(forKey: "tray.settings"),
-              let s = try? JSONDecoder().decode(TraySettings.self, from: data) else { return TraySettings() }
+              let saved = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
+              let defaultsData = try? JSONEncoder().encode(TraySettings()),
+              var merged = (try? JSONSerialization.jsonObject(with: defaultsData)) as? [String: Any]
+        else { return TraySettings() }
+        merged.merge(saved) { _, new in new }
+        guard let mergedData = try? JSONSerialization.data(withJSONObject: merged),
+              let s = try? JSONDecoder().decode(TraySettings.self, from: mergedData) else { return TraySettings() }
         return s
     }
 

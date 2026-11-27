@@ -105,7 +105,7 @@ struct PasteStackView: View {
         .foregroundStyle(Tokens.C.ink)
         .padding(Tokens.S.s3)
         .frame(width: 280, height: 340)
-        .background(Tokens.C.surfaceRaised)
+        .background(WindowBackground(style: model.backgroundStyle, surface: Tokens.C.surfaceRaised))
         .clipShape(RoundedRectangle(cornerRadius: Tokens.R.xl, style: .continuous))
         .environment(\.trayAccent, accent)
         .tint(accent.color)

@@ -6,6 +6,7 @@ struct OnboardingView: View {
     let model: AppModel
     let onDone: () -> Void
     @State private var trusted = Paster.isTrusted
+    @State private var openAtLogin = true
 
     var body: some View {
         VStack(alignment: .leading, spacing: Tokens.S.s6) {
@@ -22,6 +23,9 @@ struct OnboardingView: View {
             point("keyboard", "Pasting needs Accessibility",
                   "So Return can paste straight into the app you're in, allow Tray under System Settings › Privacy & Security › Accessibility. Without it, Tray copies and you press ⌘V.")
 
+            Toggle("Open Tray when I log in", isOn: $openAtLogin)
+                .toggleStyle(.checkbox)
+
             HStack {
                 if trusted {
                     Label("Accessibility allowed", systemImage: "checkmark.circle.fill")
@@ -32,7 +36,10 @@ struct OnboardingView: View {
                     }
                 }
                 Spacer()
-                Button("Get started") { onDone() }
+                Button("Get started") {
+                    if openAtLogin { LaunchAtLogin.set(true) }
+                    onDone()
+                }
                     .keyboardShortcut(.defaultAction)
             }
 

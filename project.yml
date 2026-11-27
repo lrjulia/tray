@@ -14,6 +14,7 @@ targets:
     platform: macOS
     sources:
       - Sources/Tray
+      - Resources/Assets.xcassets
     info:
       path: Resources/Info.plist
       properties:
@@ -30,7 +31,8 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: app.tray.Tray
         PRODUCT_NAME: Tray
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ENABLE_HARDENED_RUNTIME: YES
         CODE_SIGN_STYLE: Automatic
-        MARKETING_VERSION: "0.1.0"
-        CURRENT_PROJECT_VERSION: "1"
+        MARKETING_VERSION: "0.2.0"
+        CURRENT_PROJECT_VERSION: "2"

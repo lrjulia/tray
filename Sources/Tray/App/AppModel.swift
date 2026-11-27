@@ -29,6 +29,7 @@ final class AppModel {
             applyAppearance()
             if settings.hideFromScreenSharing != oldValue.hideFromScreenSharing { onPrivacyChange?() }
             if settings.showMenuBarIcon != oldValue.showMenuBarIcon { onMenuBarIconChange?() }
+            if settings.retention != oldValue.retention { store.applyRetention(settings) }
         }
     }
 
@@ -89,6 +90,11 @@ final class AppModel {
     var accent: AccentOption {
         _ = accentVersion
         return settings.accent.resolved
+    }
+
+    /// Solid when the user turned on Reduce Transparency in Accessibility settings.
+    var backgroundStyle: BackgroundStyle {
+        NSWorkspace.shared.accessibilityDisplayShouldReduceTransparency ? .solid : settings.background
     }
 
     func applyAppearance() {

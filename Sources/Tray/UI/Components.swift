@@ -180,3 +180,74 @@ enum Fmt {
         ByteCountFormatter.string(fromByteCount: Int64(n), countStyle: .file)
     }
 }
+
+// MARK: - Window background (transparent / translucent / solid)
+
+struct VisualEffectBackground: NSViewRepresentable {
+    var material: NSVisualEffectView.Material = .popover
+
+    func makeNSView(context: Context) -> NSVisualEffectView {
+        let view = NSVisualEffectView()
+        view.material = material
+        view.blendingMode = .behindWindow
+        view.state = .active
+        return view
+    }
+
+    func updateNSView(_ view: NSVisualEffectView, context: Context) {
+        view.material = material
+    }
+}
+
+/// The window's ground: the desktop blurred behind it, with a tint of `surface` so text stays readable.
+struct WindowBackground: View {
+    let style: BackgroundStyle
+    var surface: Color = Tokens.C.surface
+
+    var body: some View {
+        if style == .solid {
+            surface
+        } else {
+            ZStack {
+                VisualEffectBackground()
+                surface.opacity(style.tint)
+            }
+        }
+    }
+}
+
+// MARK: - Accent swatches
+
+struct AccentSwatches: View {
+    @Bindable var model: AppModel
+
+    var body: some View {
+        HStack(spacing: 10) {
+            swatch(label: "Follow macOS", color: AccentOption.nearestToSystem().color, selected: model.settings.accent == .followSystem, systemIcon: true) {
+                model.settings.accent = .followSystem
+            }
+            ForEach(AccentOption.allCases) { option in
+                swatch(label: option.label, color: option.color, selected: model.settings.accent == .option(option), systemIcon: false) {
+                    model.settings.accent = .option(option)
+                }
+            }
+        }
+    }
+
+    private func swatch(label: String, color: Color, selected: Bool, systemIcon: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            ZStack {
+                Circle().fill(color).frame(width: 20, height: 20)
+                if systemIcon {
+                    Image(systemName: "desktopcomputer").font(.system(size: 9, weight: .bold)).foregroundStyle(Tokens.C.onAccent)
+                }
+            }
+            .padding(3)
+            .overlay(Circle().strokeBorder(selected ? Tokens.C.ink : .clear, lineWidth: 2))
+        }
+        .buttonStyle(.plain)
+        .help(label)
+        .accessibilityLabel(label)
+        .accessibilityAddTraits(selected ? .isSelected : [])
+    }
+}

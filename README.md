@@ -98,10 +98,15 @@ Open it with **⌘⇧V**.
 | Paste Stack | ⌘⇧C |
 | Pause recording | ⌥⌘P |
 
+## Settings
+
+Open Settings from the gear in the window, the menu-bar icon, or ⌘, while the window is open.
+General leads with: Open Tray at login, Accent color, and Keep history for. Appearance has the window
+background (Transparent, Translucent, Solid).
+
 ## Known gaps
 
 - Global shortcuts are fixed (no shortcut recorder in Settings yet).
-- No app icon yet (the menu-bar icon is the SF Symbol `list.clipboard`).
 - Link titles aren't fetched (Tray makes no network calls); links show their host.
 - "Paste Stack" relies on a 0.5 s check between copies; copying and pasting faster than that can skip an item.
 - No tests yet. The pure-logic parts (`ContentClassifier`, `SensitiveDetector`, `TextTransform`) are the easiest place to start.
